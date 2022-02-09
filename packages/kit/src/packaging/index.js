@@ -54,14 +54,17 @@ export async function make_package(config, cwd = process.cwd()) {
 		const svelte_ext = config.extensions.find((ext) => file.endsWith(ext)); // unlike `ext`, could be e.g. `.svelte.md`
 
 		if (!config.kit.package.files(normalized)) {
-			const dts_file = (svelte_ext ? file : file.slice(0, -ext.length)) + '.d.ts';
-			const dts_path = path.join(package_dir, dts_file);
-			if (fs.existsSync(dts_path)) {
-				fs.unlinkSync(dts_path);
+			const base = svelte_ext ? file : file.slice(0, -ext.length);
+			const dts_files = [base + '.d.ts', base + '.d.mts', base + '.d.cts'];
+			for (const dts_file of dts_files) {
+				const dts_path = path.join(package_dir, dts_file);
+				if (fs.existsSync(dts_path)) {
+					fs.unlinkSync(dts_path);
 
-				const dir = path.dirname(dts_path);
-				if (fs.readdirSync(dir).length === 0) {
-					fs.rmdirSync(dir);
+					const dir = path.dirname(dts_path);
+					if (fs.readdirSync(dir).length === 0) {
+						fs.rmdirSync(dir);
+					}
 				}
 			}
 			continue;
